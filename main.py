@@ -1,9 +1,8 @@
-
 import pygame
 import sys
 import random
-from maze_generator import Maze
-from core import Player,Police
+from maze_generator import Maze, bfs
+from core import Player, Police
 
 # Initialize pygame
 pygame.init()
@@ -36,20 +35,38 @@ Maze.add_loops(maze, loop_count=10)
 
 # Create player
 player = Player(maze, CELL_SIZE)
-police = Police(maze, maze.width - 2, maze.height - 2)
+sprite = pygame.sprite.Group(player)
 
+numpolice = 2 
+mindistance = 15
+policelist = [] 
+police_group = pygame.sprite.Group() 
+
+candidate_cells = []
+for y in range(maze.height):
+    for x in range(maze.width):
+        if not maze.is_wall(x, y):
+            path = bfs(maze, (1, 1), (x, y))
+            if path and len(path) > mindistance:
+                candidate_cells.append((x, y))
+
+random.shuffle(candidate_cells)
+for i in range(numpolice):
+    if i < len(candidate_cells):
+        px, py = candidate_cells[i]
+        police = Police(maze, px, py)
+        policelist.append(police)
+        police_group.add(police)
 
 def draw_maze():
     """Draw the maze on the screen"""
     for y in range(maze.height):
         for x in range(maze.width):
             rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
-
             if maze.is_wall(x, y):
                 pygame.draw.rect(screen, BLACK, rect)
             else:
                 pygame.draw.rect(screen, WHITE, rect)
-
             if maze.exit and (x, y) == maze.exit:
                 pygame.draw.rect(screen, GREEN, rect)
 
@@ -60,36 +77,56 @@ def draw_ui():
     text = font.render(f"Moves: {player.moves} | Arrow Keys/WASD to move", True, WHITE)
     screen.blit(text, (10, ui_y + 15))
 
-# Main game loop
-running = True
-while running:
-    clock.tick(5)
 
-    # Event handling
+running = True
+police_timer = 0 
+
+while running:
+    dt = clock.tick(10)  
+    police_timer += dt
+    
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-
-    # Update player
-    player.update()
-    police.update(player)
     
 
-    # Drawing
+    player.update()
+    
+
+    if police_timer >= 250 and not player.game_won and not player.game_lost:
+        for police in policelist:
+            police.update(player)
+        police_timer = 0
+    
+
     screen.fill(WHITE)
     draw_maze()
     player.draw(screen)
-    police.draw(screen, CELL_SIZE)
-    draw_ui()
+    
 
-    # Draw victory message
+    for police in policelist:
+        police.draw(screen, CELL_SIZE)
+    
+    draw_ui()
+    
+
     if player.game_won:
-        victory_text = font.render(f"YOU WON in {player.moves} moves! Press ESC to exit",True, GREEN)
+        victory_text = font.render(f"YOU WON in {player.moves} moves! Press ESC to exit", True, GREEN)
         screen.blit(victory_text, (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2))
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+    
     if player.game_lost:
         lost_text = font.render("YOU LOST! Caught by the police! Press ESC to exit", True, (255, 0, 0))
         screen.blit(lost_text, (SCREEN_WIDTH // 2 - 250, SCREEN_HEIGHT // 2))
-
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+    
     pygame.display.flip()
 
 pygame.quit()
