@@ -8,11 +8,11 @@ from core import Player, Police
 pygame.init()
 
 # Constants
-CELL_SIZE = 20
-MAZE_WIDTH = 21
-MAZE_HEIGHT = 11
+CELL_SIZE = 40
+MAZE_WIDTH = 25
+MAZE_HEIGHT = 15
 SCREEN_WIDTH = MAZE_WIDTH * CELL_SIZE
-SCREEN_HEIGHT = MAZE_HEIGHT * CELL_SIZE + 50
+SCREEN_HEIGHT = MAZE_HEIGHT * CELL_SIZE + 60
 
 # Colors
 BLACK = (0, 0, 0)
@@ -82,7 +82,7 @@ police_timer = 0
 
 initialize_game()
 while running:
-    dt = clock.tick(10)  
+    dt = clock.tick(60)  
     police_timer += dt
     
 
