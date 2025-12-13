@@ -3,10 +3,9 @@ from collections import deque
 
 class Maze:
     def __init__(self, width, height):
-        # ensure odd number dimensions for the maze
         self.width = width // 2 * 2 + 1
         self.height = height // 2 * 2 + 1
-        self.cells = [[True for x in range(self.width)] for y in range(self.height)]  # True: wall, False: path
+        self.cells = [[True for x in range(self.width)] for y in range(self.height)]  
         self.exit = None
     
     def set_path(self, x, y):
@@ -25,35 +24,40 @@ class Maze:
         for dx, dy in directions:
             nx, ny = x + 2*dx, y + 2*dy
             if self.is_wall(nx, ny):
-                self.set_path(x + dx, y + dy)  # open the wall between cells
-                self.create_maze(nx, ny)  # recurse to next cell
-    
+                self.set_path(x + dx, y + dy)  
+                self.create_maze(nx, ny)  
+
     def set_random_exit(self):
         border_cells = []
-        min_distance = 10
         
         for x in range(1, self.width - 1, 2):
-            if not self.is_wall(x, 1):  # top row
-                border_cells.append((x, 0))
-            if not self.is_wall(x, self.height - 2):  # bottom row
-                border_cells.append((x, self.height - 1))
+            if not self.is_wall(x, 1): 
+                border_cells.append((x, 1))
+            if not self.is_wall(x, self.height - 2): 
+                border_cells.append((x, self.height - 2))
         
         for y in range(1, self.height - 1, 2):
-            if not self.is_wall(1, y):  # left column
-                border_cells.append((0, y))
-            if not self.is_wall(self.width - 2, y):  # right column
-                border_cells.append((self.width - 1, y))
+            if not self.is_wall(1, y): 
+                border_cells.append((1, y))
+            if not self.is_wall(self.width - 2, y): 
+                border_cells.append((self.width - 2, y))
         
-        far_cells = []
+        start_pos = (1, 1)
+        best_exit = None
+        max_dist = -1
+
         for candidate in border_cells:
-            path = bfs(self, (1, 1), candidate)
-            if len(path) > min_distance:
-                far_cells.append(candidate)
+            path = bfs(self, start_pos, candidate)
+            if path:
+                dist = len(path)
+                if dist > max_dist:
+                    max_dist = dist
+                    best_exit = candidate
         
-        if far_cells:
-            self.exit = random.choice(far_cells)
+        if best_exit:
+            self.exit = best_exit
         else:
-            self.exit = random.choice(border_cells)
+            self.exit = border_cells[-1] if border_cells else (self.width-2, self.height-2)
         
         self.set_path(*self.exit)
     
@@ -81,7 +85,6 @@ class Maze:
             y = random.randrange(2, maze.height - 2, 2)
             
             if maze.is_wall(x, y):
-                # Check for exactly two paths on opposite sides (horizontal only)
                 if (not maze.is_wall(x-1, y) and not maze.is_wall(x+1, y) and maze.is_wall(x, y-1) and maze.is_wall(x, y+1)) or \
                    (not maze.is_wall(x, y-1) and not maze.is_wall(x, y+1) and maze.is_wall(x-1, y) and maze.is_wall(x+1, y)):
                     maze.set_path(x, y)
