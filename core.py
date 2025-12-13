@@ -89,15 +89,21 @@ class Coin(pygame.sprite.Sprite):
         self.rect.y = y * cell_size
 
 class Police(pygame.sprite.Sprite):
-    def __init__(self, maze, start_x, start_y):
+    def __init__(self, maze, start_x, start_y, mode="Easy"): 
         super().__init__()
         self.maze = maze
         self.policex = start_x
         self.policey = start_y
+        self.mode = mode 
     
     def move_towards_player(self, target_x, target_y):
-        from maze_generator import bfs
-        path = bfs(self.maze, (self.policex, self.policey), (target_x, target_y))
+        if self.mode == "Hard":
+            from maze_generator import astar
+            path = astar(self.maze, (self.policex, self.policey), (target_x, target_y))
+        else:
+            from maze_generator import bfs
+            path = bfs(self.maze, (self.policex, self.policey), (target_x, target_y))
+            
         if len(path) > 1:
             self.policex, self.policey = path[1]
     
@@ -109,11 +115,11 @@ class Police(pygame.sprite.Sprite):
     def draw(self, surface, cell_size):
         police_size = int(cell_size * 0.8)
         padding = (cell_size - police_size) // 2
-        
         rect = pygame.Rect(
             self.policex * cell_size + padding,
             self.policey * cell_size + padding,
             police_size,
             police_size
         )
-        pygame.draw.rect(surface, (200, 50, 50), rect, border_radius=5)
+        color = (200, 50, 50) if self.mode == "Easy" else (200, 0, 0) 
+        pygame.draw.rect(surface, color, rect, border_radius=5)

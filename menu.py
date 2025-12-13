@@ -14,9 +14,10 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 HIGHLIGHT = (217, 13, 13) # Biru
 GRAY = (100, 100, 100)
+BLUE = (11, 47, 212)
 
 # Font
-title_font = pygame.font.Font(None, 70)
+title_font = pygame.font.Font(None, 90)
 menu_font = pygame.font.Font(None, 50)
 
 def draw_text_centered(text, font, color, y_offset):
@@ -32,27 +33,26 @@ def draw_text(text, font, color,x_offset, y_offset):
 def main_menu():
     global screen
     
-    options = ["Start Game", "Quit"]
+    # --- UPDATE OPSI MENU ---
+    options = ["Easy Mode", "Hard Mode", "Quit"]
     selected_index = 0
     
     bg_image = None
     try:
-        original_image = pygame.image.load("menu2.png")
+        original_image = pygame.image.load("menu3.png")
         bg_image = pygame.transform.scale(original_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     except pygame.error:
-        print("Gambar tidak ditemukan! Pastikan nama file benar.")
-    
+        print("Gambar background tidak ditemukan.")
     
     overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
     overlay.fill(BLACK)
-    overlay.set_alpha(150)
+    overlay.set_alpha(50)
+
     try:
         pygame.mixer.music.load("menu_bgm.mp3")
         pygame.mixer.music.set_volume(0.5) 
         pygame.mixer.music.play(-1) 
-    except pygame.error:
-        print("File lagu tidak ditemukan.")
-
+    except pygame.error: pass
 
     while True:
         if bg_image:
@@ -61,15 +61,13 @@ def main_menu():
         else:
             screen.fill(BLACK)
         
-        draw_text("ESCAPE THE POLICE", title_font, WHITE,700, -220)
-        draw_text("can you escape?", menu_font , GRAY,700, -170)
+        draw_text("ESCAPE THE POLICE", title_font, WHITE, 500, -250)
+        # draw_text("Can you escape?", menu_font , BLUE, 500, -200)
         
         for i, option in enumerate(options):
             color = HIGHLIGHT if i == selected_index else WHITE
             text = f"> {option} <" if i == selected_index else option
-            # draw_text_centered(text, menu_font, color, 50 + (i * 60))
-            draw_text(text, menu_font, color, 700, -50 + (i * 60))
-        # draw_text("Use Arrow Keys & Enter", pygame.font.Font(None, 24), GRAY, 700, 100)
+            draw_text(text, menu_font, color, 500, 100 + (i * 60))
 
         pygame.display.flip()
         
@@ -84,15 +82,26 @@ def main_menu():
                 elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                     selected_index = (selected_index + 1) % len(options)
                 elif event.key == pygame.K_RETURN:
+
                     if selected_index == 0:
+                        # EASY MODE
                         pygame.mixer.music.stop()
-                        start_game()
-                        # Reset layar menu setelah main
+                        start_game("Easy") # Panggil dengan parameter Easy
                         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
                         pygame.display.set_caption("Maze Game - Main Menu")
+                        try: pygame.mixer.music.play(-1)
+                        except: pass
                         
-                        pygame.mixer.music.play(-1)
                     elif selected_index == 1:
+                        # HARD MODE
+                        pygame.mixer.music.stop()
+                        start_game("Hard") # Panggil dengan parameter Hard
+                        screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                        pygame.display.set_caption("Maze Game - Main Menu")
+                        try: pygame.mixer.music.play(-1)
+                        except: pass
+                        
+                    elif selected_index == 2:
                         pygame.quit()
                         sys.exit()
         

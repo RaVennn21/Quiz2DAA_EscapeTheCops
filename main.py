@@ -4,7 +4,6 @@ import random
 from maze_generator import Maze, bfs
 from core import Player, Police, Coin
 
-# --- CONSTANTS ---
 CELL_SIZE = 40
 MAZE_WIDTH = 25
 MAZE_HEIGHT = 15
@@ -25,7 +24,7 @@ GRAY = (150, 150, 150)
 screen = None
 clock = None
 font = None
-large_font = None # Font baru untuk judul besar
+large_font = None 
 maze = None
 player = None
 coins_group = None 
@@ -50,27 +49,22 @@ def draw_ui():
     text = font.render(status_text, True, WHITE)
     screen.blit(text, (10, ui_y + 20))
 
-# --- FUNGSI BARU: GAMBAR LAYAR AKHIR ---
 def draw_end_screen(title, color, sub_text_str):
-    # 1. Fill layar hitam penuh
     screen.fill(BLACK)
     
-    # 2. Gambar Judul Besar (Tengah)
     title_surf = large_font.render(title, True, color)
     title_rect = title_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
     screen.blit(title_surf, title_rect)
     
-    # 3. Gambar Info Tambahan
     info_surf = font.render(f"Moves: {player.moves} | Coins Collected: {player.coins_collected}", True, WHITE)
     info_rect = info_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 10))
     screen.blit(info_surf, info_rect)
 
-    # 4. Gambar Instruksi (Retry/Quit)
     sub_surf = font.render(sub_text_str, True, GRAY)
     sub_rect = sub_surf.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 50))
     screen.blit(sub_surf, sub_rect)
 
-def initialize_game():
+def initialize_game(difficulty="Easy"):
     global maze, player, coins_group, policelist, police_group
     
     maze = Maze(MAZE_WIDTH, MAZE_HEIGHT)
@@ -80,7 +74,7 @@ def initialize_game():
     
     player = Player(maze, CELL_SIZE)
     
-    # --- SPAWN COINS ---
+    # Spawn Coins
     coins_group = pygame.sprite.Group()
     placed_coins = 0
     while placed_coins < 3:
@@ -89,14 +83,13 @@ def initialize_game():
         if not maze.is_wall(cx, cy) and (cx, cy) != (1, 1) and (cx, cy) != maze.exit:
              is_stack = False
              for c in coins_group:
-                 if c.x == cx and c.y == cy:
-                     is_stack = True
+                 if c.x == cx and c.y == cy: is_stack = True
              if not is_stack:
                 coin = Coin(cx, cy, CELL_SIZE)
                 coins_group.add(coin)
                 placed_coins += 1
 
-    # --- SPAWN POLICE ---
+    # Spawn Police
     policelist = [] 
     numpolice = 2 
     police_group = pygame.sprite.Group() 
@@ -124,105 +117,75 @@ def initialize_game():
     for i in range(numpolice):
         if i < len(candidate_cells):
             px, py = candidate_cells[i]
-            police = Police(maze, px, py)
+            # --- PASSING DIFFICULTY KE POLICE ---
+            police = Police(maze, px, py, mode=difficulty)
             policelist.append(police)
             police_group.add(police)
 
-def start_game():
+def start_game(difficulty="Easy"):
     global screen, clock, font, large_font
     
     pygame.init()
-    try:
-        pygame.mixer.init()
-    except:
-        pass
+    try: pygame.mixer.init()
+    except: pass
     
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Maze Game - Collect 3 Coins!")
+    pygame.display.set_caption(f"Maze Game - {difficulty} Mode") 
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 28)
-    large_font = pygame.font.Font(None, 80) # Font besar untuk Game Over
+    large_font = pygame.font.Font(None, 80)
 
-    # Music Play
     try:
         pygame.mixer.music.load("bgm.mp3")
         pygame.mixer.music.set_volume(0.4) 
         pygame.mixer.music.play(-1) 
-    except pygame.error:
-        pass
+    except: pass
 
-    initialize_game()
+    initialize_game(difficulty)
     
     running = True
     police_timer = 0 
-    
-    # Variabel status warna teks
     warning_timer = 0 
+    
+    
+    police_move_interval = 200 if difficulty == "Hard" else 350
 
     while running:
         dt = clock.tick(60)
         
-        # Event Handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
 
-        # ==========================================
-        # LOGIKA PERCABANGAN (STATE MACHINE SIMPEL)
-        # ==========================================
-        
-        # KONDISI 1: KALAH (GAME OVER)
         if player.game_lost:
-            # Gambar layar hitam penuh
             draw_end_screen("GAME OVER", RED, "Press R to Retry, ESC to Menu")
-            
-            # Input hanya untuk R atau ESC
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_r]:
-                initialize_game()
-            if keys[pygame.K_ESCAPE]:
-                running = False
+            if keys[pygame.K_r]: initialize_game(difficulty) 
+            if keys[pygame.K_ESCAPE]: running = False
 
-        # KONDISI 2: MENANG (VICTORY)
-        # Cek menang hanya jika koin cukup.
         elif player.game_won and player.coins_collected >= 3:
-            # Gambar layar hitam penuh
             draw_end_screen("VICTORY!", GREEN, "Press R to Replay, ESC to Menu")
-            
-            # Input hanya untuk R atau ESC
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_r]:
-                initialize_game()
-            if keys[pygame.K_ESCAPE]:
-                running = False
+            if keys[pygame.K_r]: initialize_game(difficulty)
+            if keys[pygame.K_ESCAPE]: running = False
 
-        # KONDISI 3: GAME MASIH JALAN
         else:
-            # --- UPDATE ---
             police_timer += dt
-            
-            # Player hanya diupdate di sini (jadi kalau menang/kalah, dia ga gerak)
             player.update()
             
-            # Cek Koin
             collected = pygame.sprite.spritecollide(player, coins_group, True)
-            if collected:
-                player.coins_collected += len(collected)
+            if collected: player.coins_collected += len(collected)
 
-            # Cek Polisi
-            if police_timer >= 250:
+            if police_timer >= police_move_interval:
                 for police in policelist:
                     police.update(player)
                 police_timer = 0
 
-            # Cek Exit tapi Koin Kurang
-            # Jika player nyentuh exit (game_won True) tapi koin kurang
             if player.game_won and player.coins_collected < 3:
-                player.game_won = False # Reset biar ga stuck dan ga trigger win screen
-                warning_timer = 60 # Set timer untuk tulisan peringatan (60 frame / 1 detik)
+                player.game_won = False 
+                warning_timer = 60 
 
-            # --- DRAWING (GAMEPLAY) ---
             screen.fill(WHITE)
             draw_maze()
             coins_group.draw(screen)
@@ -231,17 +194,13 @@ def start_game():
                 police.draw(screen, CELL_SIZE)
             draw_ui()
 
-            # Gambar tulisan peringatan jika ada
             if warning_timer > 0:
                 warn_text = font.render("Collect all coins first!", True, RED)
-                # Tampilkan di atas kepala player
                 screen.blit(warn_text, (player.rect.x - 40, player.rect.y - 30))
                 warning_timer -= 1
             
-            # Tombol ESC saat main (Pause/Back)
             keys = pygame.key.get_pressed()
-            if keys[pygame.K_ESCAPE]:
-                running = False
+            if keys[pygame.K_ESCAPE]: running = False
 
         pygame.display.flip()
 
@@ -249,4 +208,4 @@ def start_game():
     return
 
 if __name__ == "__main__":
-    start_game()
+    start_game("Easy")  
