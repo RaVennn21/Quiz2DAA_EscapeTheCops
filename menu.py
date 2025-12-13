@@ -69,7 +69,6 @@ def main_menu():
             text = f"> {option} <" if i == selected_index else option
             # draw_text_centered(text, menu_font, color, 50 + (i * 60))
             draw_text(text, menu_font, color, 700, -50 + (i * 60))
-            
         # draw_text("Use Arrow Keys & Enter", pygame.font.Font(None, 24), GRAY, 700, 100)
 
         pygame.display.flip()
