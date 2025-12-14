@@ -1,5 +1,6 @@
 import pygame
 import sys
+import os
 import random
 from maze_generator import Maze, bfs
 from core import Player, Police, Coin
@@ -27,26 +28,40 @@ font = None
 large_font = None
 maze = None
 player = None
+wall_texture = None
+floor_texture = None
+exit_texture = None
 coins_group = None 
 policelist = []
 police_group = None
-PLAYER_IMAGE_PATH = None
+PLAYER_IMAGE_PATH = "criminal_police.png"
 
 def draw_maze():
     for y in range(maze.height):
         for x in range(maze.width):
             rect = pygame.Rect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
+            
             if maze.is_wall(x, y):
-                pygame.draw.rect(screen, BLACK, rect)
+                if wall_texture:
+                    screen.blit(wall_texture, rect)
+                else:
+                    pygame.draw.rect(screen, BLACK, rect)
             else:
-                pygame.draw.rect(screen, WHITE, rect)
+                if floor_texture:
+                    screen.blit(floor_texture, rect)
+                else:
+                    pygame.draw.rect(screen, WHITE, rect)
+            
             if maze.exit and (x, y) == maze.exit:
-                pygame.draw.rect(screen, GREEN, rect)
+                if exit_texture:
+                    screen.blit(exit_texture, rect)
+                else:
+                    pygame.draw.rect(screen, GREEN, rect)
 
 def draw_ui():
     ui_y = MAZE_HEIGHT * CELL_SIZE
     pygame.draw.rect(screen, DARK_GRAY, (0, ui_y, SCREEN_WIDTH, 60))
-    status_text = f"Moves: {player.moves} | Coins: {player.coins_collected}"
+    status_text = f"Moves: {player.moves} | Cakes: {player.coins_collected}"
     text = font.render(status_text, True, WHITE)
     screen.blit(text, (10, ui_y + 20))
 
@@ -122,13 +137,47 @@ def initialize_game(difficulty="Easy"):
 
 
 def start_game(difficulty="Easy"):
-    global screen, clock, font, large_font
+    global screen, clock, font, large_font, wall_texture, floor_texture, exit_texture
     
     pygame.init()
     try: pygame.mixer.init()
     except: pass
     
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+    try:
+        if os.path.exists("tile.png"):
+            img = pygame.image.load("tile.png").convert()
+            wall_texture = pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
+            print("Wall texture loaded.")
+        else:
+            wall_texture = None
+    except Exception as e:
+        print("Failed to load wall texture:", e)
+        wall_texture = None
+    
+    try:
+        if os.path.exists("floor.png"): 
+            img = pygame.image.load("floor.png").convert()
+            floor_texture = pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
+            print("Floor texture loaded.")
+        else:
+            floor_texture = None
+    except Exception as e:
+        print("Failed to load floor:", e)
+        floor_texture = None
+
+    try:
+        if os.path.exists("vent.png"):
+            img = pygame.image.load("vent.png").convert_alpha() # Use convert_alpha for transparency
+            exit_texture = pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
+            print("Exit texture loaded.")
+        else:
+            exit_texture = None
+    except Exception as e:
+        print("Failed to load exit:", e)
+        exit_texture = None
+
     pygame.display.set_caption(f"Maze Game - {difficulty} Mode") 
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 28)
@@ -208,14 +257,14 @@ def start_game(difficulty="Easy"):
             if difficulty == "Endless":
                 ui_y = MAZE_HEIGHT * CELL_SIZE
                 pygame.draw.rect(screen, DARK_GRAY, (0, ui_y, SCREEN_WIDTH, 60))
-                surv_text = f"Coins: {player.coins_collected} | POLICE COUNT: {len(policelist)}"
+                surv_text = f"Cakes: {player.coins_collected} | POLICE COUNT: {len(policelist)}"
                 text = font.render(surv_text, True, RED) # Warna Merah biar serem
                 screen.blit(text, (10, ui_y + 20))
             else:
                 draw_ui()
 
             if warning_timer > 0:
-                warn_text = font.render("Collect all coins first!", True, RED)
+                warn_text = font.render("Collect all cakes first!", True, RED)
                 screen.blit(warn_text, (player.rect.x - 40, player.rect.y - 30))
                 warning_timer -= 1
             
