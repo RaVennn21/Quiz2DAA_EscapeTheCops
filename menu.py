@@ -6,7 +6,7 @@ pygame.init()
 pygame.mixer.init() 
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Maze Game - Main Menu")
+pygame.display.set_caption("Escape The Police!")
 clock = pygame.time.Clock()
 
 # Color
@@ -60,8 +60,8 @@ def main_menu():
         else:
             screen.fill(BLACK)
         
-        draw_text("ESCAPE THE POLICE", title_font, WHITE, 700, -220)
-        draw_text("Can you escape?", menu_font, GRAY, 700, -170)
+        draw_text("ESCAPE THE POLICE", title_font, WHITE, 500, -270)
+        # draw_text("Pick diff", menu_font, GRAY, 700, -170)
         # draw_text("Can you escape?", menu_font , BLUE, 500, -200)
         
         for i, option in enumerate(options):
@@ -88,7 +88,7 @@ def main_menu():
                         pygame.mixer.music.stop()
                         start_game("Easy") # Panggil dengan parameter Easy
                         screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-                        pygame.display.set_caption("Maze Game - Main Menu")
+                        pygame.display.set_caption("Escape The - Main Menu")
                         try: pygame.mixer.music.play(-1)
                         except: pass
                         
