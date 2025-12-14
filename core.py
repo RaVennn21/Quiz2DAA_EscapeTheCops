@@ -1,7 +1,8 @@
 import pygame
+import os
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, maze, cell_size):
+    def __init__(self, maze, cell_size, image_path=None):
         super().__init__()
         self.maze = maze
         self.cell_size = cell_size
@@ -21,8 +22,20 @@ class Player(pygame.sprite.Sprite):
         self.last_move_time = 0
         self.move_delay = 100 
 
-        self.image = pygame.Surface((self.player_size, self.player_size))
-        self.image.fill((50, 120, 200)) 
+        loaded_custom = False
+        if image_path and os.path.exists(image_path):
+            try:
+                original_image = pygame.image.load(image_path).convert_alpha()
+                self.image = pygame.transform.scale(original_image, (self.player_size, self.player_size))
+                loaded_custom = True
+                print(f"Sukses load gambar player: {image_path}")
+            except Exception as e:
+                print(f"Gagal load gambar custom: {e}. Kembali ke default.")
+        
+        if not loaded_custom:
+            self.image = pygame.Surface((self.player_size, self.player_size))
+            self.image.fill((50, 120, 200)) # Warna Biru
+
         
         self.rect = self.image.get_rect()
         self.update_rect_position()
@@ -70,7 +83,8 @@ class Player(pygame.sprite.Sprite):
                 self.game_won = True
     
     def draw(self, surface):
-        pygame.draw.rect(surface, (50, 120, 200), self.rect, border_radius=5)
+        # pygame.draw.rect(surface, (50, 120, 200), self.rect, border_radius=5)
+        surface.blit(self.image, self.rect)
 
 class Coin(pygame.sprite.Sprite):
     def __init__(self, x, y, cell_size):
