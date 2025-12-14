@@ -17,7 +17,7 @@ GRAY = (100, 100, 100)
 BLUE = (11, 47, 212)
 
 # Font
-title_font = pygame.font.Font(None, 90)
+title_font = pygame.font.Font(None, 70)
 menu_font = pygame.font.Font(None, 50)
 
 def draw_text_centered(text, font, color, y_offset):
@@ -33,13 +33,12 @@ def draw_text(text, font, color,x_offset, y_offset):
 def main_menu():
     global screen
     
-    # --- UPDATE OPSI MENU ---
     options = ["Easy Mode", "Hard Mode", "Quit"]
     selected_index = 0
     
     bg_image = None
     try:
-        original_image = pygame.image.load("menu3.png")
+        original_image = pygame.image.load("menu4.png")
         bg_image = pygame.transform.scale(original_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
     except pygame.error:
         print("Gambar background tidak ditemukan.")
@@ -61,13 +60,14 @@ def main_menu():
         else:
             screen.fill(BLACK)
         
-        draw_text("ESCAPE THE POLICE", title_font, WHITE, 500, -250)
+        draw_text("ESCAPE THE POLICE", title_font, WHITE, 700, -220)
+        draw_text("Can you escape?", menu_font, GRAY, 700, -170)
         # draw_text("Can you escape?", menu_font , BLUE, 500, -200)
         
         for i, option in enumerate(options):
             color = HIGHLIGHT if i == selected_index else WHITE
             text = f"> {option} <" if i == selected_index else option
-            draw_text(text, menu_font, color, 500, 100 + (i * 60))
+            draw_text(text, menu_font, color, 720, -80 + (i * 60))
 
         pygame.display.flip()
         
