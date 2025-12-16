@@ -18,7 +18,7 @@ clock = pygame.time.Clock()
 # Color
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-HIGHLIGHT = (217, 13, 13) # Biru
+HIGHLIGHT = (217, 13, 13) 
 GRAY = (100, 100, 100)
 BLUE = (11, 47, 212)
 GREEN = (50, 200, 50)
@@ -27,11 +27,6 @@ GREEN = (50, 200, 50)
 title_font = pygame.font.Font(None, 70)
 menu_font = pygame.font.Font(None, 50)
 small_font = pygame.font.Font(None, 30)
-
-def draw_text_centered(text, font, color, y_offset):
-    surface = font.render(text, True, color)
-    rect = surface.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + y_offset))
-    screen.blit(surface, rect)
 
 def draw_text(text, font, color,x_offset, y_offset):
     surface = font.render(text, True, color)
@@ -60,7 +55,7 @@ def select_image_file():
 def main_menu():
     global screen
     
-    options = ["Easy", "Hard", "Endless","Custom Image", "Quit"]
+    options = ["Easy", "Hard", "Endless", "Quit"]
     selected_index = 0
 
     image_status_text = ""
@@ -96,12 +91,8 @@ def main_menu():
         for i, option in enumerate(options):
             color = HIGHLIGHT if i == selected_index else WHITE
             text = f"> {option} <" if i == selected_index else option
-            draw_text(text, menu_font, color, 720, -150 + (i * 60))
+            draw_text(text, menu_font, color, 720, -120 + (i * 60))
 
-        if game.PLAYER_IMAGE_PATH:
-            filename = os.path.basename(game.PLAYER_IMAGE_PATH)
-            status_msg = f"Using custom image: {filename}"
-            draw_text(status_msg, small_font, GREEN, 500, 250) 
 
         pygame.display.flip()
         
@@ -118,10 +109,6 @@ def main_menu():
                 elif event.key == pygame.K_RETURN:
                     
                     if selected_index == 3:
-                        if select_image_file():
-                            screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-                    
-                    elif selected_index == 4:
                         pygame.quit()
                         sys.exit()
                         
