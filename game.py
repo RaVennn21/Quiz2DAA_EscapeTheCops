@@ -90,7 +90,7 @@ def spawn_new_police(difficulty):
         
         if not maze.is_wall(cx, cy):
             dist = abs(cx - player.player_x) + abs(cy - player.player_y)
-            if dist > 12: 
+            if dist > 20: 
                 px, py = cx, cy
                 valid_spot = True
         attempts += 1
