@@ -1,4 +1,4 @@
-#FP KKA Escape the cops
+# FP KKA Escape the cops
 ## 🚓 Escape The Police Maze Game 🍰
 
 ### 🎮 How to Play
