@@ -169,7 +169,7 @@ def start_game(difficulty="Easy"):
 
     try:
         if os.path.exists("vent.png"):
-            img = pygame.image.load("vent.png").convert_alpha() # Use convert_alpha for transparency
+            img = pygame.image.load("vent.png").convert_alpha() 
             exit_texture = pygame.transform.scale(img, (CELL_SIZE, CELL_SIZE))
             print("Exit texture loaded.")
         else:

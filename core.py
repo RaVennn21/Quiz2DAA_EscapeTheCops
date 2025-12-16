@@ -10,19 +10,18 @@ def load_sprites(path, width, height, is_player=True):
     sheet = pygame.image.load(path).convert_alpha()
     sheet_w, sheet_h = sheet.get_size()
     
-    # Calculate single frame size (assuming 4 columns, 2 rows)
     frame_width = sheet_w // 4
     frame_height = sheet_h // 2
     
     sprites = []
-    # Row 0 is Player, Row 1 is Police
+   
     row = 0 if is_player else 1
     
     for col in range(4):
         rect = pygame.Rect(col * frame_width, row * frame_height, frame_width, frame_height)
-        # Extract the specific frame
+      
         image = sheet.subsurface(rect)
-        # Scale to game cell size immediately
+        
         image = pygame.transform.scale(image, (width, height))
         sprites.append(image)
         
@@ -46,9 +45,8 @@ class Player(pygame.sprite.Sprite):
         self.last_move_time = 0
         self.move_delay = 100 
 
-        # --- SPRITE LOADING ---
+        
         # 0: Front/Down, 1: Right, 2: Back/Up, 3: Left
-        # (You may need to swap these indices depending on your specific png layout)
         self.sprites = load_sprites(image_path, self.player_size, self.player_size, is_player=True)
         
         # Default fallback if image fails
@@ -57,7 +55,7 @@ class Player(pygame.sprite.Sprite):
             surf.fill((50, 120, 200))
             self.sprites = [surf] * 4
 
-        self.current_image = self.sprites[0] # Default facing front
+        self.current_image = self.sprites[0] # Default front
         self.rect = self.current_image.get_rect()
         self.update_rect_position()
     
@@ -79,24 +77,22 @@ class Player(pygame.sprite.Sprite):
             moved = False 
             
             # --- DIRECTIONAL MOVEMENT AND SPRITE SWAPPING ---
-            # Indices [0,1,2,3] correspond to the columns in your image.
-            # Adjust these numbers if your image order is different.
             if keys[pygame.K_UP] or keys[pygame.K_w]:
                 new_y -= 1
                 moved = True
-                self.current_image = self.sprites[2] # Back View
+                self.current_image = self.sprites[2] # Back 
             elif keys[pygame.K_DOWN] or keys[pygame.K_s]:
                 new_y += 1
                 moved = True
-                self.current_image = self.sprites[0] # Front View
+                self.current_image = self.sprites[0] # Front 
             elif keys[pygame.K_LEFT] or keys[pygame.K_a]:
                 new_x -= 1
                 moved = True
-                self.current_image = self.sprites[3] # Left View
+                self.current_image = self.sprites[3] # Left 
             elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
                 new_x += 1
                 moved = True
-                self.current_image = self.sprites[1] # Right View
+                self.current_image = self.sprites[1] # Right 
             
             if moved:
                 if self.can_move(new_x, new_y):
@@ -110,7 +106,6 @@ class Player(pygame.sprite.Sprite):
                 self.game_won = True
     
     def draw(self, surface):
-        # Draw the currently selected sprite frame
         surface.blit(self.current_image, self.rect)
 
 class Coin(pygame.sprite.Sprite):
@@ -123,15 +118,13 @@ class Coin(pygame.sprite.Sprite):
         self.rect = pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size)
         self.image = None
 
-        # 1. Try to load the image
+       
         if os.path.exists(image_path):
             try:
                 raw_image = pygame.image.load(image_path).convert_alpha()
-                # Scale it to fit the cell (maybe slightly smaller for a nice look)
                 icon_size = int(cell_size * 0.8)
                 scaled_image = pygame.transform.scale(raw_image, (icon_size, icon_size))
                 
-                # Center the image in the cell
                 self.image = pygame.Surface((cell_size, cell_size), pygame.SRCALPHA)
                 offset = (cell_size - icon_size) // 2
                 self.image.blit(scaled_image, (offset, offset))
@@ -139,14 +132,12 @@ class Coin(pygame.sprite.Sprite):
             except Exception as e:
                 print(f"Error loading coin: {e}")
 
-        # 2. Fallback: Draw the yellow circle if no image found
         if self.image is None:
             self.image = pygame.Surface((cell_size, cell_size), pygame.SRCALPHA)
             radius = int(cell_size * 0.3)
             pygame.draw.circle(self.image, (255, 215, 0), (cell_size//2, cell_size//2), radius)
 
 class Police(pygame.sprite.Sprite):
-    # Class variable to store sprites so we don't reload file for every police
     sprites = []
 
     def __init__(self, maze, start_x, start_y, mode="Easy"): 
@@ -155,11 +146,10 @@ class Police(pygame.sprite.Sprite):
         self.policex = start_x
         self.policey = start_y
         self.mode = mode 
-        self.cell_size = 40 # Default backup
+        self.cell_size = 40 
         
-        # Load sprites once if empty
         if not Police.sprites:
-             # Assuming standard size 40, you might need to pass actual cell_size if it changes
+            
             police_size = int(40 * 0.8)
             Police.sprites = load_sprites("criminal_police.png", police_size, police_size, is_player=False)
 
@@ -195,12 +185,10 @@ class Police(pygame.sprite.Sprite):
         police_size = int(cell_size * 0.8)
         padding = (cell_size - police_size) // 2
         
-        # If sprites loaded successfully, draw image
         if self.image:
             pos = (self.policex * cell_size + padding, self.policey * cell_size + padding)
             surface.blit(self.image, pos)
         else:
-            # Fallback to Red Rectangle
             rect = pygame.Rect(
                 self.policex * cell_size + padding,
                 self.policey * cell_size + padding,

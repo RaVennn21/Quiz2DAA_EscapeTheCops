@@ -17,6 +17,7 @@ class Maze:
             return self.cells[y][x]
         return False
     
+    # --- Depth-First Search Backtracker Maze BGeneration ---
     def create_maze(self, x, y):
         self.set_path(x, y)
         directions = [[1,0],[-1,0],[0,1],[0,-1]]
@@ -67,6 +68,7 @@ class Maze:
                     added += 1
             tries += 1
 
+# --- BFS PATHFINDING FOR POLICE EASY MODE ---
 def bfs(maze, start, goal):
     queue = deque()
     queue.append((start, [start]))
@@ -83,6 +85,7 @@ def bfs(maze, start, goal):
                 visited.add((nx, ny))
     return [start]
 
+# --- A* PATHFINDING FOR POLICE HARD MODE ---
 def heuristic(a, b): #Manhatan distance
     return abs(a[0] - b[0]) + abs(a[1] - b[1])
 
